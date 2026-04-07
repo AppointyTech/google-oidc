@@ -1,4 +1,4 @@
-module github.com/animesh00101/oidc
+module github.com/appointyTech/google-oidc
 
 go 1.25.0
 

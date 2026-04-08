@@ -222,12 +222,16 @@ func (o *Options) SignOut(w http.ResponseWriter, r *http.Request) {
 }
 
 func (o *Options) SetAuthCookie(w http.ResponseWriter, r *http.Request, token *Token) error {
+	secure := true
+	if o.TLSAutoSwitch {
+		secure = r.TLS != nil
+	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     o.CookieOptions.Name,
 		Value:    token.AccessToken,
 		MaxAge:   o.CookieOptions.MaxAge,
 		HttpOnly: true,
-		Secure:   r.TLS != nil,
+		Secure:   secure,
 		Expires:  o.CookieOptions.Expires,
 		Domain:   o.CookieOptions.Domain,
 		Path:     o.CookieOptions.Path,
@@ -241,10 +245,10 @@ func (o *Options) SetAuthCookie(w http.ResponseWriter, r *http.Request, token *T
 		Path:     o.SignOutPath,
 		Domain:   o.CookieOptions.Domain,
 		HttpOnly: true,
-		Secure:   r.TLS != nil,
+		Secure:   secure,
 	})
 
-	//Todo: need to enocde this cookie value
+	//Todo: need to encode this cookie value
 	http.SetCookie(w, &http.Cookie{
 		Name:     "refresh_token",
 		Value:    token.RefreshToken,
@@ -252,7 +256,7 @@ func (o *Options) SetAuthCookie(w http.ResponseWriter, r *http.Request, token *T
 		Path:     o.CookieOptions.Path,
 		Domain:   o.CookieOptions.Domain,
 		HttpOnly: true,
-		Secure:   r.TLS != nil,
+		Secure:   secure,
 	})
 
 	// TODO: Something About Refresh Token
@@ -294,13 +298,17 @@ func (o *Options) encryptTempToCookie(w http.ResponseWriter, r *http.Request, na
 		return err
 	}
 
+	secure := true
+	if o.TLSAutoSwitch {
+		secure = r.TLS != nil
+	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     name,
 		Value:    encVal,
 		Path:     path,
 		Domain:   o.CookieOptions.Domain,
 		MaxAge:   o.RedirectionMaxAge, // In Seconds
-		Secure:   r.TLS != nil,
+		Secure:   secure,
 		HttpOnly: true,
 		Expires:  time.Now().UTC().Add(time.Duration(o.RedirectionMaxAge) * time.Second),
 	})

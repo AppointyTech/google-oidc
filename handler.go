@@ -28,7 +28,6 @@ func handlerFromOptions(opt *Options) http.Handler {
 	mux.HandleFunc(opt.SignOutPath, opt.AuthHandler.SignOut)
 	mux.HandleFunc(opt.SignOutCallbackPath, opt.AuthHandler.SignOutCallback)
 
-
 	mux.Handle("/", opt.NotFoundHandler)
 
 	return mux
@@ -52,7 +51,7 @@ func (o *Options) SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	scheme := "https"
-	if r.TLS == nil {
+	if r.TLS == nil && o.TLSAutoSwitch {
 		scheme = "http"
 	}
 
@@ -79,7 +78,6 @@ func (o *Options) SignIn(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, authCodeUrl, http.StatusFound)
 }
 
-
 func (o *Options) SignInCallback(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
@@ -105,7 +103,7 @@ func (o *Options) SignInCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	scheme := "https"
-	if r.TLS == nil {
+	if r.TLS == nil && o.TLSAutoSwitch {
 		scheme = "http"
 	}
 
@@ -195,7 +193,7 @@ func (o *Options) SignOut(w http.ResponseWriter, r *http.Request) {
 	}
 
 	scheme := "https"
-	if r.TLS == nil {
+	if r.TLS == nil && o.TLSAutoSwitch {
 		scheme = "http"
 	}
 
@@ -246,7 +244,7 @@ func (o *Options) SetAuthCookie(w http.ResponseWriter, r *http.Request, token *T
 		Secure:   r.TLS != nil,
 	})
 
-	//Todo: need to enocde this cookie value 
+	//Todo: need to enocde this cookie value
 	http.SetCookie(w, &http.Cookie{
 		Name:     "refresh_token",
 		Value:    token.RefreshToken,
@@ -327,14 +325,12 @@ func (o *Options) decryptTempFromCookie(w http.ResponseWriter, r *http.Request, 
 	return value, nil
 }
 
-
 type AuthHandler interface {
 	SignIn(http.ResponseWriter, *http.Request)
 	SignInCallback(http.ResponseWriter, *http.Request)
 
 	SignOut(http.ResponseWriter, *http.Request)
 	SignOutCallback(http.ResponseWriter, *http.Request)
-
 }
 
 type Token struct {

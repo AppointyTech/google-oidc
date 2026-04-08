@@ -44,7 +44,6 @@ type Options struct {
 	PostSignInRedirect  string
 	PostSignOutRedirect string
 
-
 	ResponseType string
 	ResponseMode ResponseMode
 
@@ -67,6 +66,14 @@ type Options struct {
 	LogoutURI       string
 
 	AuthHandler AuthHandler
+
+	TLSAutoSwitch bool
+}
+
+func WithTLSAutoSwitch(toggle bool) Option {
+	return func(o *Options) {
+		o.TLSAutoSwitch = toggle
+	}
 }
 
 // CookieOptions is the various cookie options that are configurable for the identity cookie
@@ -90,7 +97,6 @@ func DefaultOptions() Options {
 		SignInPath:  "/oidc/sign-in",
 		SignOutPath: "/oidc/sign-out",
 
-		
 		PostSignOutRedirect: "/",
 		PostSignInRedirect:  "/",
 
@@ -119,7 +125,8 @@ func DefaultOptions() Options {
 			Timeout: 10 * time.Second,
 		},
 
-		ErrorLogger: log.New(os.Stderr, "oidc: ", 0),
+		ErrorLogger:   log.New(os.Stderr, "oidc: ", 0),
+		TLSAutoSwitch: true,
 	}
 }
 
